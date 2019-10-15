@@ -4,7 +4,7 @@ from pypika import Query, Table, Field
 
 
 @dataclass
-class GitHubUserDB:
+class GitHubUser:
     id: Optional[int]
     endpoint: str
     email: str

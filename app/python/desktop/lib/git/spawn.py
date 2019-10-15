@@ -1,13 +1,21 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import asyncio
+import os
 
 
 async def spawn_and_complete(args: List[str],
-                             path: str) -> Tuple[bytes, bytes]:
-    args = ['git', f"--git-dir {path.join(path, '.git')}"] + args
+                             path: str,
+                             stdin: Optional[str] = None) -> Tuple[bytes, bytes, int]:
+    args = ['git', f"--git-dir {os.path.join(path, '.git')}"] + args
     proc = await asyncio.create_subprocess_shell(' '.join(args),
+                                                 stdin=asyncio.subprocess.PIPE,
                                                  stdout=asyncio.subprocess.PIPE,
                                                  stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
+    if stdin:
+        proc.stdin.write(stdin.encode('utf-8'))
+        await proc.stdin.drain()
 
-    return stdout, stderr
+    stdout, stderr = await proc.communicate()
+    returncode = proc.returncode
+
+    return stdout, stderr, returncode

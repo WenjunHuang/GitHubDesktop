@@ -5,6 +5,7 @@ from collections import deque
 from dataclasses import dataclass, field, InitVar
 from enum import Enum
 from typing import *
+
 from typing_extensions import Literal
 
 from desktop.lib.git.diff import get_binary_paths
@@ -53,25 +54,28 @@ class OrdinaryEntryType(Enum):
     Deleted = 'deleted'
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnmergedEntry:
+    __slots__ = ['action', 'us', 'them']
     action: UnmergedEntrySummary
     us: GitStatusEntry
     them: GitStatusEntry
 
 
-@dataclass
+@dataclass(frozen=True)
 class OrdinaryEntry:
     type: OrdinaryEntryType
     index: Optional[GitStatusEntry] = None
     working_tree: Optional[GitStatusEntry] = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class PlainFileStatus:
+    __slots__ = ['kind']
     kind: Literal[AppFileStatusKind.New, AppFileStatusKind.Modified, AppFileStatusKind.Deleted]
 
 
+@dataclass(frozen=True)
 class TextConflictEntry:
     kind: Literal[AppFileStatusKind.Conflicted]
     action: UnmergedEntrySummary
@@ -145,12 +149,12 @@ async def get_status(repository: Repository):
         '--porcelain=2',
         '-z',
     ]
-    stdout, stderr = spawn_and_complete(args, repository.path)
+    stdout, stderr, returncode = await spawn_and_complete(args, repository.path)
 
     if stdout:
         parsed = parse_porcelain_status(stdout.decode())
-        headers = itertools.takewhile(lambda i: type(i) == StatusItem, parsed)
-        entries = itertools.takewhile(lambda i: type(i) == StatusEntry, parsed)
+        headers = filter(lambda i: type(i) == StatusHeader, parsed)
+        entries = filter(lambda i: type(i) == StatusEntry, parsed)
         merge_head_found = is_mergeheadset(repository)
 
         conflicted_files_in_index = any([i.status_code in kConflictStatusCode for i in entries])
@@ -309,7 +313,7 @@ async def get_rebase_conflict_details(repository: Repository):
 
 async def get_working_directory_conflict_details(repository: Repository):
     conflict_counts_by_path = await get_files_with_conflict_markers(repository.path)
-    binary_file_paths = []
+    binary_file_paths: List[str] = []
     try:
         binary_file_paths = await get_binary_paths(repository, 'HEAD')
     except:
@@ -330,14 +334,14 @@ class FileChange:
         else:
             self.id = f"{status.kind.value}+{path}"
 
+
 @dataclass
 class WorkingDirectoryFileChange(FileChange):
-    selection:DiffSelection
+    selection: DiffSelection
 
 
-
-
-def build_status_map(files: MutableMapping[str, WorkingDirectoryFileChange])
+def build_status_map(files: MutableMapping[str, WorkingDirectoryFileChange]):
+    pass
 
 
 kChangeEntryType = '1'
