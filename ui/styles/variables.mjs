@@ -1,4 +1,3 @@
-//.pragma library
 import * as Colors from "color_system.mjs"
 
 
