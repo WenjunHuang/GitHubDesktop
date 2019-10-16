@@ -10,7 +10,7 @@ class LoadAccountRepositoryEvent:
     token: str
 
     @classmethod
-    def create(cls, js_props: QJSValue):
+    def from_jsvalue(cls, js_props: QJSValue):
         token = js_props.property('token').toString()
         endpoint = js_props.property('endpoint').toString()
         return LoadAccountRepositoryEvent(token=token, endpoint=endpoint)

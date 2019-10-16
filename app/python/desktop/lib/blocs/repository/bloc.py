@@ -19,7 +19,6 @@ class AccountRepositoryBloc(Bloc):
     async def map_event_to_state(self, event):
         if isinstance(event, LoadAccountRepositoryEvent):
             yield LoadingAccountRepositoriesState()
-            print(event.endpoint,event.token)
             api = API(endpoint=event.endpoint, token=event.token)
             try:
                 repositories = await api.fetch_repositories()
@@ -28,14 +27,9 @@ class AccountRepositoryBloc(Bloc):
             else:
                 yield AccountRepositoriesLoadedState(repositories=repositories)
 
-    def create_event(self, event_name: str, event_props: QJSValue):
-        if event_name == LoadAccountRepositoryEvent.__name__:
-            return LoadAccountRepositoryEvent.create(event_props)
-        return None
-
-    def dispatch(self, event_name: str, event_props: QJSValue):
-        event = self.create_event(event_name, event_props)
-        if event:
-            asyncio.create_task(self.dispatch_event(event))
-        else:
-            raise BlocError(f"can not create event object of name: {event_name}")
+    def map_javascript_event(self, event: QJSValue):
+        event_type = event.property("event_type")
+        if not event_type.isUndefined() and event_type.isString():
+            if event_type.toString() == LoadAccountRepositoryEvent.__name__:
+                return LoadAccountRepositoryEvent.from_jsvalue(event)
+        raise BlocError(f"can not convert javascript object to event object")
