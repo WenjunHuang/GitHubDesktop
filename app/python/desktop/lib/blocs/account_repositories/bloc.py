@@ -1,25 +1,24 @@
 from typing import Any
 
-from PyQt5.QtQml import QJSValue
-
 from desktop.lib.api import API
 from desktop.lib.bloc import Bloc, BlocError
-from desktop.lib.blocs.repository import RepositoryNotLoadedState, LoadAccountRepositoryEvent, \
-    LoadingAccountRepositoriesState, FailToLoadAccountRepositoriesState, AccountRepositoriesLoadedState, Account
-import asyncio
+from .events import *
+from .states import *
 
 
-class AccountRepositoryBloc(Bloc):
-    def __init__(self):
+class AccountRepositoriesBloc(Bloc):
+    def __init__(self, account: Account):
         super().__init__()
+        self.account = account
 
     def initial_state(self) -> Any:
+        self.dispatch(LoadAccountRepositoriesEvent())
         return RepositoryNotLoadedState()
 
     async def map_event_to_state(self, event):
-        if isinstance(event, LoadAccountRepositoryEvent):
+        if isinstance(event, LoadAccountRepositoriesEvent):
             yield LoadingAccountRepositoriesState()
-            api = API(endpoint=event.endpoint, token=event.token)
+            api = API(endpoint=self.account.endpoint, token=self.account.token)
             try:
                 repositories = await api.fetch_repositories()
             except Exception as e:
@@ -30,6 +29,6 @@ class AccountRepositoryBloc(Bloc):
     def map_javascript_event(self, event: QJSValue):
         event_type = event.property("event_type")
         if not event_type.isUndefined() and event_type.isString():
-            if event_type.toString() == LoadAccountRepositoryEvent.__name__:
-                return LoadAccountRepositoryEvent.from_jsvalue(event)
+            if event_type.toString() == LoadAccountRepositoriesEvent.__name__:
+                return LoadAccountRepositoriesEvent.from_jsvalue(event)
         raise BlocError(f"can not convert javascript object to event object")

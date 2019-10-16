@@ -64,22 +64,6 @@ class Bloc(QObject):
             self._event_queue.task_done()
 
 
-class BlockProvider(QQuickItem):
-    BlocTypes: MutableMapping[str, Bloc] = {}
-
-    @classmethod
-    def register(cls, blocCls):
-        cls.BlocTypes[blocCls.__name__] = blocCls
-
-    @classmethod
-    def create_bloc(cls, name: str):
-        blocCls = cls.BlocTypes.get(name, None)
-        if not blocCls:
-            return blocCls()
-        else:
-            return None
-
-
 class BlocBuilder(QQuickItem):
     stateChanged = pyqtSignal('QJSValue', arguments=['state'])
 
