@@ -1,4 +1,4 @@
-from enum import Enum, unique, auto
+from enum import Enum, unique, auto, IntEnum
 
 kAuthenticatorAppWelcomeText = "Open the two-factor authentication app on your device to view your authentication " \
                                "code and verify your identity. "
@@ -7,9 +7,8 @@ kSmsMessageWelcomeText = "We just sent you a message via SMS with your authentic
 
 
 @unique
-class AuthenticationMode(Enum):
-    Sms = auto()
-    App = auto()
+class AuthenticationMode(IntEnum):
+    Sms, App = range(2)
 
 
 def get_welcome_message(type: AuthenticationMode) -> str:

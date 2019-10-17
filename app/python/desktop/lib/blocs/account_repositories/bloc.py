@@ -2,6 +2,7 @@ from typing import Any
 
 from desktop.lib.api import API
 from desktop.lib.bloc import Bloc, BlocError
+from desktop.lib.models import Account
 from .events import *
 from .states import *
 

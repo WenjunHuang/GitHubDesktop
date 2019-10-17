@@ -2,11 +2,11 @@ from abc import ABC
 from typing import *
 
 
-class IDataStore(ABC):
-    def set_item(self, key: str, value: str) -> None:
+class IKeyValueStore(ABC):
+    async def set_item(self, key: str, value: str) -> None:
         pass
 
-    def get_item(self, key: str) -> Optional[str]:
+    async def get_item(self, key: str) -> Optional[str]:
         pass
 
 

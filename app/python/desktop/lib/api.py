@@ -8,7 +8,6 @@ from datetime import datetime
 from urllib.parse import urlsplit, urlunsplit, unquote
 from uuid import uuid4
 
-from PyQt5.QtCore import Q_ENUM
 from dataclasses_json import config
 
 from desktop.lib.common import with_logger, get_machine_username
@@ -71,7 +70,14 @@ class APIFullIdentityData:
     url: str
     login: str
     avatar_url: str
+    type: GitHubAccountType = field(
+        metadata=config(
+            encoder=GitHubAccountType,
+            decoder=GitHubAccountType.from_str
+        )
+    )
     name: Optional[str] = None
+    email: Optional[str] = None
 
 
 @dataclass_json
@@ -443,6 +449,17 @@ class API:
         except Exception as e:
             self._logger.warning(f"failed for {owner}/{name}", e)
             return None
+
+    async def fetch_user(self, login: str) -> Optional[APIFullIdentityData]:
+        path = f"users/{quote(login)}"
+        try:
+            response = await self.__request(HTTPMethod.GET, path)
+            if response.status == 404:
+                return None
+            return await parse_response(response, APIFullIdentityData)
+        except Exception as e:
+            self._logger.warning(f"fetch_user: failed with endpoint {self.endpoint}", e)
+            raise
 
     async def __fetch_all(self,
                           path: str,

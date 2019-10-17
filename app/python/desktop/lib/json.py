@@ -21,3 +21,9 @@ def _(value: str) -> str:
 @json_generator.register(abc.Mapping)
 def _(value: Mapping) -> str:
     return json.dumps(value)
+
+
+@json_generator.register(abc.Iterable)
+def _(value: Iterator) -> str:
+    result = ','.join([json_generator(i) for i in value])
+    return f"[{result}]"

@@ -8,35 +8,39 @@ from pyee import BaseEventEmitter
 
 from desktop.lib.auth import get_key_for_account
 from desktop.lib.common import with_logger
+from desktop.lib.json import json_generator
 from desktop.lib.models.account import Account, fetch_user
-from desktop.lib.stores.stores import IDataStore, ISecureStore
+from desktop.lib.stores.stores import IKeyValueStore, ISecureStore
 from .base_store import BaseStore
+from aiosqlite import Connection, Cursor
 
 
 @with_logger
 class AccountsStore(BaseStore):
-    def __init__(self, data_store: IDataStore, secure_store: ISecureStore):
+    def __init__(self, data_store: IKeyValueStore, secure_store: ISecureStore):
         super().__init__()
-        self._data_store = data_store
-        self._security_store = secure_store
-        self._emitter = BaseEventEmitter()
-        self._loading_task = asyncio.create_task(self.__load_from_store())
+        self.data_store = data_store
+        self.security_store = secure_store
+        self.emitter = BaseEventEmitter()
+        self.loading_task = asyncio.create_task(self.__load_from_store())
+        self.accounts = []
 
     async def get_all(self) -> List[Account]:
-        await self._loading_task
-        return self._accounts.copy()
+        await self.loading_task
+        return self.accounts.copy()
 
     async def add_account(self, account: Account) -> Optional[Account]:
-        await self._loading_task
+        await self.loading_task
 
         updated = account
         try:
             updated = await updated_account(account)
         except Exception as e:
             self._logger.warning(f"Failed to fetch user {account.login}", e)
+            raise
 
         try:
-            await self._security_store.set_item(
+            await self.security_store.set_item(
                 get_key_for_account(updated),
                 updated.login,
                 updated.token
@@ -46,15 +50,15 @@ class AccountsStore(BaseStore):
             self.emit_error(e)
             return None
 
-        self._accounts.append(updated)
-        self.save()
+        self.accounts.append(updated)
+        await self.save()
         return updated
 
     async def refresh(self):
         futures = map(lambda acc: self.__try_update_account(acc), self._accounts)
         result, _ = await asyncio.wait(futures)
         self._accounts = [f.result for f in result]
-        self.save()
+        await self.save()
         self.emit_update(self._accounts)
 
     async def remove_account(self, account: Account):
@@ -68,11 +72,12 @@ class AccountsStore(BaseStore):
             return
         else:
             self._accounts = filter(lambda a: a.id != account.id, self._accounts)
-            self.save()
+            await self.save()
 
     async def save(self):
-        users_without_tokens = map(lambda account: account.with_token(''), self._accounts)
-        self._data_store.set_item('users', json)
+        users_without_tokens = [account.with_token('') for account in self.accounts]
+        result = json_generator(users_without_tokens)
+        await self.data_store.set_item('users', result)
 
     async def __try_update_account(self, acc: Account):
         try:
@@ -82,22 +87,23 @@ class AccountsStore(BaseStore):
             return acc
 
     async def __load_from_store(self):
-        raw = self._data_store.get_item('users')
+        raw = await self.data_store.get_item('users')
         if not raw:
             return
 
+        raw = json.loads(raw)
         accounts_with_tokens = []
-        for item in map(lambda i: Account.json.loads(i), raw):
+        for item in map(lambda i: Account.from_dict(i), raw):
             account_without_token = Account(**(asdict(item)))
             key = get_key_for_account(account_without_token)
             try:
-                token = await self._security_store.get_item(key, item.login)
+                token = await self.security_store.get_item(key, item.login)
                 accounts_with_tokens.append(account_without_token.with_token(token))
             except Exception as e:
                 logging.error(f"Error getting token for '{key}'. Skipping.", e)
                 self.emit_error(e)
-        self._accounts = accounts_with_tokens
-        self.emit_update(self._accounts)
+        self.accounts = accounts_with_tokens
+        self.emit_update(self.accounts)
 
 
 async def updated_account(account: Account) -> Account:
