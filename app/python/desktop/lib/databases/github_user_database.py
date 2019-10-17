@@ -3,18 +3,11 @@ from dataclasses import dataclass
 from pypika import Query, Table, Field
 
 
-@dataclass
-class GitHubUser:
-    id: Optional[int]
-    endpoint: str
-    email: str
-    login: str
-    avatar_url: str
-    name: Optional[str]
 
 
-@dataclass
+@dataclass(frozen=True)
 class MentionableAssociationDB:
+    __slots__ = ['id', 'user_id', 'repository_id']
     id: int
     user_id: int
     repository_id: int

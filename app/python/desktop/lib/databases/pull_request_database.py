@@ -3,14 +3,14 @@ from dataclasses import dataclass
 from pypika import Query, Table, Field
 
 
-@dataclass
+@dataclass(frozen=True)
 class PullRequestRefDB:
     repo_id: int
     ref: str
     sha: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class PullRequestDB:
     number: int
     title: str
@@ -21,7 +21,7 @@ class PullRequestDB:
     author: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class PullRequestsLastUpdatedDB:
     repo_id: int
     last_updated: int

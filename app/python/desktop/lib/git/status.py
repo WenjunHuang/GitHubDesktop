@@ -2,7 +2,7 @@ import itertools
 import logging
 import re
 from collections import deque
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import *
 
@@ -13,6 +13,7 @@ from desktop.lib.git.diff_check import get_files_with_conflict_markers
 from desktop.lib.git.merge import is_mergeheadset
 from desktop.lib.git.rebase import get_rebase_internal_state, RebaseInternalState
 from desktop.lib.git.spawn import spawn_and_complete
+from desktop.lib.models.diff import DiffSelection
 from desktop.lib.models.repository import Repository
 
 
@@ -322,22 +323,28 @@ async def get_working_directory_conflict_details(repository: Repository):
                                 binary_file_paths=binary_file_paths)
 
 
-@dataclass
+@dataclass(frozen=True)
 class FileChange:
     id: str = field(init=False)
-    path: InitVar[str]
-    status: InitVar[AppFileStatus]
+    path: str
+    status: AppFileStatus
 
-    def __post_init__(self, path: str, status: AppFileStatus):
-        if status.kind == AppFileStatusKind.Renamed or status.kind == AppFileStatusKind.Copied:
-            self.id = f"{status.kind.value}+{path}+{status.old_path}"
+    def __post_init__(self):
+        if self.status.kind == AppFileStatusKind.Renamed or self.status.kind == AppFileStatusKind.Copied:
+            object.__setattr__(self, 'id', f"{self.status.kind.value}+{self.path}+{self.status.old_path}")
         else:
-            self.id = f"{status.kind.value}+{path}"
+            object.__setattr__(self, 'id', f"{self.status.kind.value}+{self.path}")
 
 
-@dataclass
+@dataclass(frozen=True)
 class WorkingDirectoryFileChange(FileChange):
     selection: DiffSelection
+
+
+@dataclass(frozen=True)
+class CommittedFileChange(FileChange):
+    commitish: str
+
 
 
 def build_status_map(files: MutableMapping[str, WorkingDirectoryFileChange]):

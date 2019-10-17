@@ -4,7 +4,7 @@ from pypika import Query, Table, Field
 from datetime import datetime
 
 
-@dataclass
+@dataclass(frozen=True)
 class OwnerDB:
     id: Optional[int]
     login: str
@@ -14,7 +14,7 @@ class OwnerDB:
 OwnerTable = Table('t_owner')
 
 
-@dataclass
+@dataclass(frozen=True)
 class GitHubRepositoryDB:
     id: Optional[int]
     owner_id: int

@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List
 
 from desktop.lib.api import APIRepositoryData
-from desktop.lib.models import Account
 
 
 @dataclass

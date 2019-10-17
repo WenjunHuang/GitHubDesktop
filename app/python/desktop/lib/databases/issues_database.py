@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pypika import Query, Table, Field
 
 
-@dataclass
+@dataclass(frozen=True)
 class IssueDB:
     id: int
     github_repository_id: int

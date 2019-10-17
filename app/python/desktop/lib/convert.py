@@ -1,7 +1,7 @@
 from dataclasses import is_dataclass, fields
 from enum import Enum
 from functools import singledispatch
-from typing import Optional, Any
+from typing import Optional, Any, Iterable
 
 from PyQt5.QtQml import QJSValue
 
@@ -37,7 +37,8 @@ def _(data):
 
 
 @to_jsobject.register(list)
-def _(data: list):
+@to_jsobject.register(tuple)
+def _(data: Iterable[Any]):
     js_array = get_qml_engine().newArray()
     for idx, v in enumerate(data):
         result = to_jsobject(v)
