@@ -17,6 +17,7 @@ def with_logger(cls):
     else:
         raise AssertionError
     setattr(cls, attr_name, logging.getLogger(cls_name))
+    setattr(cls, "logger", logging.getLogger(cls_name))
     return cls
 
 

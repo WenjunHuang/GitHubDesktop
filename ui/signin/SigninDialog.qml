@@ -1,21 +1,27 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import Desktop 1.0
 import "../common" as C
 import "../dialog"
 import "../octicons"
 import "../styles/variables.mjs" as Vars
 
 GithubDialog {
-    id: _dialog
+    id: root
     title: 'Sign in'
     submitButtonText: 'Sign in'
     dismissButtonText: 'Cancel'
-    enableSubmit: dialogContent.userAccount.text
-                  && dialogContent.userPassword.text
+    enableSubmit: dialogContent.userAccount && dialogContent.userPassword
+    loading: viewModel.loading
+
+    SignInViewModel {
+        id: viewModel
+    }
 
     contentComponent: Component {
         C.Pane {
+            id: signInContent
             property alias userAccount: _userAccount.text
             property alias userPassword: _userPassword.text
             padding: Vars.spacingX2
@@ -134,5 +140,9 @@ GithubDialog {
 
     onDismissed: {
         console.log("dismissed press")
+    }
+
+    Component.onCompleted: {
+        viewModel.beginDotComSignIn()
     }
 }

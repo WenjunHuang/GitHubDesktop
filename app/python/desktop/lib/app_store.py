@@ -17,14 +17,15 @@ class AppStore(QObject):
     key_value_store: IKeyValueStore
     account_store: AccountsStore
 
-    def __init__(self):
+    def __init__(self, config_dir: str):
         super().__init__()
+        self._config_dir = config_dir
 
     async def load_initial_state(self):
-        config_dir = await get_config_dir()
+        config_dir = self._config_dir
         await self.initialize_database(config_dir)
         self.init_key_value_store()
-        self.init_key_value_store()
+        self.init_secure_store()
 
         self.github_user_database = GitHubUserDatabase(self.database)
         self.account_store = AccountsStore(self.key_value_store, self.secure_store)
@@ -51,12 +52,14 @@ class AppStore(QObject):
         self.secure_store = TokenStore()
 
 
-async def get_config_dir():
-    # 获取配置存储的目录
-    return os.getcwd()
+app_store: AppStore = None
 
 
-app_store = AppStore()
+
+
+def init_app_store(config_dir: str):
+    global app_store
+    app_store = AppStore(config_dir)
 
 
 def get_app_store():

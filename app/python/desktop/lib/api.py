@@ -581,6 +581,7 @@ class AuthorizationResponseKind(IntEnum):
     PersonalAccessTokenBlocked = 4
     Error = 5
     EnterpriseTooOld = 6
+    WebFlowRequired = 7
 
 
 @dataclass
