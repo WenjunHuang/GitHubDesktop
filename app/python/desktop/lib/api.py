@@ -5,6 +5,7 @@ import socket
 from abc import ABC
 from dataclasses import field
 from datetime import datetime
+from enum import IntEnum
 from urllib.parse import urlsplit, urlunsplit, unquote
 from uuid import uuid4
 
@@ -572,7 +573,7 @@ def get_dotcom_api_endpoint() -> str:
     return 'https://api.github.com'
 
 
-class AuthorizationResponseKind(Enum):
+class AuthorizationResponseKind(IntEnum):
     Authorized = 0
     Failed = 1
     TwoFactorAuthenticationRequired = 2

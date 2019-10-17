@@ -17,13 +17,12 @@ class SignInStep(IntEnum):
     EndpointEntry, Authentication, TwoFactorAuthentication, Success = range(4)
 
 
-Q_ENUM(SignInStep)
-
-
 class SignInViewModel(QQuickItem):
     didAuthenticate = pyqtSignal(Account, SignInMethod)
     loadingChanged = pyqtSignal()
     kindChanged = pyqtSignal()
+
+    Q_ENUM(SignInStep)
 
     def __init__(self, parent=None):
         super().__init__(parent)
