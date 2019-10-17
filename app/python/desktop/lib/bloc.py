@@ -1,8 +1,8 @@
 from asyncio import Queue, create_task
-from typing import AsyncGenerator, Any, Optional
+from typing import AsyncGenerator, Any, MutableMapping
 
 from PyQt5.QtCore import QObject, pyqtProperty, pyqtSignal, pyqtSlot
-from PyQt5.QtQml import QQmlEngine, QJSValue, QQmlComponent
+from PyQt5.QtQml import QQmlEngine, QJSValue
 from PyQt5.QtQuick import QQuickItem
 from rx.subject import BehaviorSubject
 
@@ -23,14 +23,8 @@ class Bloc(QObject):
         self._state_subject = BehaviorSubject(self.initial_state())
         create_task(self._bind_state_subject())
 
-    def initial_state(self) -> Any:
-        raise NotImplementedError()
-
     def current_state(self):
         return self._state_subject.value
-
-    def state(self):
-        return self._state_subject
 
     def dispose(self):
         self._state_subject.dispose()
@@ -38,24 +32,27 @@ class Bloc(QObject):
     def on_error(self, error):
         pass
 
-    def create_event(self, event_name: str, event_props: QJSValue) -> Any:
+    def initial_state(self) -> Any:
         raise NotImplementedError()
 
-    def dispatch(self, event_name: str, event_props: QJSValue):
-        event = self.create_event(event_name, event_props)
-        create_task(self._dispatch(event))
-
-    async def dispatch_event(self, event):
-        print(event)
-        await self._event_queue.put(event)
+    def map_javascript_event(self, event_props: QJSValue) -> Any:
+        raise NotImplementedError()
 
     async def map_event_to_state(self, event) -> AsyncGenerator:
         raise NotImplementedError()
 
-    async def _bind_state_subject(self):
-        create_task(self._transform_events())
+    def dispatch(self, event):
+        if type(event) == QJSValue:
+            event = self.map_javascript_event(event)
+        create_task(self.__dispatch_event(event))
 
-    async def _transform_events(self):
+    async def __dispatch_event(self, event):
+        await self._event_queue.put(event)
+
+    async def __bind_state_subject(self):
+        create_task(self.__transform_events())
+
+    async def __transform_events(self):
         while True:
             event = await self._event_queue.get()
             try:
@@ -65,22 +62,6 @@ class Bloc(QObject):
                 self.on_error(e)
 
             self._event_queue.task_done()
-
-
-class BlockProvider(QQuickItem):
-    BlocTypes = {}
-
-    @classmethod
-    def register(cls, blocCls):
-        cls.BlocTypes[blocCls.__name__] = blocCls
-
-    @classmethod
-    def create_bloc(cls, name: str):
-        blocCls = cls.BlocTypes.get(name, None)
-        if not blocCls:
-            return blocCls()
-        else:
-            return None
 
 
 class BlocBuilder(QQuickItem):
@@ -106,26 +87,26 @@ class BlocBuilder(QQuickItem):
     def blocName(self, value: str):
         bloc = QQmlEngine.contextForObject(self).contextProperty(value)
         if bloc:
-            self._disposable = bloc.state().subscribe(on_next=self.on_next)
+            self._disposable = bloc.state().subscribe(on_next=self.__on_next)
             self._bloc = bloc
         else:
             raise BlocError(f'bloc {value} does not exist in context')
 
-    def on_next(self, state):
-        try:
-            js = to_jsobject(state)
-            self.stateChanged.emit(js)
-        except Exception as e:
-            self.logger.error('error in on_next', e)
-
     @pyqtSlot(str)
     @pyqtSlot(str, QJSValue)
-    def dispatch(self, event_name: str, args: QJSValue = QJSValue()):
+    def dispatch(self, args: QJSValue = QJSValue()):
         assert self._bloc, "No bloc provided"
-        self._bloc.dispatch(event_name, args)
+        self._bloc.dispatch(args)
 
     @pyqtSlot(result='QJSValue')
     def currentState(self):
         assert self._bloc, "No bloc provided"
         # called by qml javascript to get the current state.Maybe null
         return to_jsobject(self._bloc.current_state())
+
+    def __on_next(self, state):
+        try:
+            js = to_jsobject(state)
+            self.stateChanged.emit(js)
+        except Exception as e:
+            self.logger.error('error in on_next', e)

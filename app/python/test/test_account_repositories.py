@@ -8,7 +8,7 @@ from PyQt5.QtQml import qmlRegisterType
 from asyncqt import QEventLoop
 
 from desktop.lib.bloc import BlocBuilder
-from desktop.lib.blocs.repository.bloc import AccountRepositoryBloc
+from desktop.lib.blocs.account_repositories.bloc import AccountRepositoriesBloc
 from desktop.lib.http import init_session
 from desktop.lib.static import qqmlApplicationEngine, init_qml_engine, get_qml_engine
 
@@ -26,7 +26,7 @@ init_qml_engine()
 engine = get_qml_engine()
 qmlRegisterType(BlocBuilder, 'Desktop', 1, 0, 'BlocBuilder')
 
-repo_bloc = AccountRepositoryBloc()
+repo_bloc = AccountRepositoriesBloc()
 engine.rootContext().setContextProperty('AccountRepositoryBloc', repo_bloc)
 engine.load(QUrl("test_account_repositories.qml"))
 if not engine.rootObjects():
