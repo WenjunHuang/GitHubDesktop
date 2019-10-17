@@ -30,7 +30,8 @@ class SignInViewModel(QQuickItem):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._app_store = get_app_store()
-        self._loading = False
+        self.loading = False
+        self.error = None
 
     @pyqtSlot(name='beginDotComSignIn')
     def begin_dotcom_signin(self):
@@ -145,7 +146,7 @@ class SignInViewModel(QQuickItem):
 
     @pyqtProperty(str, notify=errorChanged)
     def error(self) -> Optional[str]:
-        return self._error or None
+        return self._error
 
     @error.setter
     def error(self, error: Optional[str]):

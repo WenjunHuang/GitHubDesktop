@@ -12,7 +12,9 @@ GithubDialog {
     title: 'Sign in'
     submitButtonText: 'Sign in'
     dismissButtonText: 'Cancel'
-    enableSubmit: dialogContent.userAccount && dialogContent.userPassword
+    enableSubmit: !viewModel.loading && dialogContent.userAccount && dialogContent.userPassword
+    showError: viewModel.error
+    errorText: viewModel.error
     loading: viewModel.loading
 
     SignInViewModel {
@@ -41,6 +43,7 @@ GithubDialog {
                     C.TextInput {
                         id: _userAccount
                         Layout.fillWidth: true
+                        enabled: !viewModel.loading
                     }
                 }
                 ColumnLayout {
@@ -55,6 +58,7 @@ GithubDialog {
                         id: _userPassword
                         Layout.fillWidth: true
                         echoMode: TextInput.Password
+                        enabled:!viewModel.loading
                     }
                 }
 
@@ -133,9 +137,7 @@ GithubDialog {
     }
 
     onSubmitted: {
-        loading = true
-        showError = true
-        errorText = 'Error'
+        viewModel.authenticateWithBasicAuth(dialogContent.userAccount,dialogContent.userPassword)
     }
 
     onDismissed: {
