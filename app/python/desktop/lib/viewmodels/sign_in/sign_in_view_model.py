@@ -62,7 +62,7 @@ class SignInViewModel(QQuickItem):
             elif response.kind == AuthorizationResponseKind.Error:
                 self.loading = False
             elif response.kind == AuthorizationResponseKind.Failed:
-                if username.index('@') != -1:
+                if '@' in username:
                     self.loading = False
                     self.error = 'Incorrect email or password.'
                 else:

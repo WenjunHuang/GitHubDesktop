@@ -1,4 +1,6 @@
+import asyncio
 import os
+import sqlite3
 from collections import namedtuple
 
 import aiosqlite
@@ -35,13 +37,7 @@ class AppStore(QObject):
         db_file_path = os.path.join(config_dir, db_file)
         db = await aiosqlite.connect(db_file_path)
 
-        def namedtuple_factory(cursor, row):
-            fields = [col[0] for col in cursor.description]
-            Row = namedtuple('Row', fields)
-            return Row(*row)
-
-        db.row_factory = namedtuple_factory()
-
+        db.row_factory = sqlite3.Row
         self.database = db
 
     def init_key_value_store(self):
@@ -55,11 +51,10 @@ class AppStore(QObject):
 app_store: AppStore = None
 
 
-
-
 def init_app_store(config_dir: str):
     global app_store
     app_store = AppStore(config_dir)
+    asyncio.get_event_loop().run_until_complete(app_store.load_initial_state())
 
 
 def get_app_store():
