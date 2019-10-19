@@ -1,12 +1,13 @@
-from typing import *
 from dataclasses import dataclass
 
+import pinject
 from aiosqlite import Connection
-from pypika import Query, Table, Field
+from pypika import Query, Table
 
 from desktop.lib.api import API, GitHubAccountType
 from desktop.lib.models import Account
 from desktop.lib.models.github_user import GitHubUser
+from typing import Callable
 
 
 @dataclass(frozen=True)
@@ -22,13 +23,14 @@ MentionableAssociationTable = Table('t_mentionable_association')
 
 
 class GitHubUserDatabase:
-
-    def __init__(self, db: Connection):
-        self.db = db
+    def __init__(self, database: Connection, provide_api: Callable[[str, str], API]):
+        self._database = database
+        self._provide_api = provide_api
 
     async def get_by_login(self, account: Account, login: str):
-        q = Query.from_(UserTable).select('*').where((UserTable.endpoint == account.endpoint) & (UserTable.login == login))
-        cursor = await self.db.execute(q.get_sql())
+        q = Query.from_(UserTable).select('*').where(
+            (UserTable.endpoint == account.endpoint) & (UserTable.login == login))
+        cursor = await self._database.execute(q.get_sql())
         data = await cursor.fetchone()
 
         if data:
@@ -38,7 +40,7 @@ class GitHubUserDatabase:
                               login=data.login,
                               avatar_url=data.avatar_url,
                               name=data.name)
-        api = API.from_account(account)
+        api = self._provide_api(account.endpoint, account.token)
         try:
             api_user = await api.fetch_user(login)
         except:

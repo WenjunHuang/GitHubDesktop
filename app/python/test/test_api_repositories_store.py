@@ -3,7 +3,7 @@ import unittest
 
 from PyQt5.QtCore import pyqtSignal, QObject
 
-from desktop.lib.http import init_session, get_session
+from desktop.lib.http import init_http_session, get_http_session
 from desktop.lib.models.account import Account, fetch_user
 from desktop.lib.stores.api_repositories_store import ApiRepositoriesStore
 
@@ -21,10 +21,10 @@ class TestApiRepositoriesStore(unittest.TestCase):
         self.token = 'bc0706b46ea74b7009c82c2204358d96c04e4680'
         self.endpoint = "https://api.github.com"
         self.api_repositories_store = ApiRepositoriesStore(FakeAccountStore())
-        init_session()
+        init_http_session()
 
     def tearDown(self) -> None:
-        self.loop.run_until_complete(get_session().close())
+        self.loop.run_until_complete(get_http_session().close())
         self.loop.close()
 
     def test_load_repositories(self):

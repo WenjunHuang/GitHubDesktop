@@ -1,12 +1,13 @@
-from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, Q_ENUM
+import asyncio
+from enum import Enum, IntEnum
+
+import pinject
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Q_ENUM, pyqtProperty
+from PyQt5.QtQml import qjsEngine
 from PyQt5.QtQuick import QQuickItem
 
 from desktop.lib.api import get_dotcom_api_endpoint, create_authorization, AuthorizationResponseKind, Optional
-from desktop.lib.app_store import get_app_store
-from desktop.lib.error_message import ErrorMessage
-from desktop.lib.stores import Account, pyqtProperty, fetch_user, with_logger
-from enum import Enum, IntEnum
-import asyncio
+from desktop.lib.stores import Account, fetch_user, with_logger, AccountsStore
 
 
 class SignInMethod(Enum):
@@ -20,6 +21,7 @@ class SignInStep(IntEnum):
 
 @with_logger
 class SignInViewModel(QQuickItem):
+    # signals
     didAuthenticate = pyqtSignal(Account, SignInMethod)
     loadingChanged = pyqtSignal()
     kindChanged = pyqtSignal()
@@ -29,7 +31,10 @@ class SignInViewModel(QQuickItem):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._app_store = get_app_store()
+
+        obj_graph: pinject.object_graph = qjsEngine(self).contextProperty('object_graph')
+        self._accounts_store = obj_graph.provide(AccountsStore)
+
         self.loading = False
         self.error = None
 
@@ -107,7 +112,7 @@ class SignInViewModel(QQuickItem):
             if response.kind == AuthorizationResponseKind.Authorized:
                 token = response.token
                 account = await fetch_user(self._endpoint, token)
-                await self._app_store.account_store.add_account(account)
+                await self._account_store.add_account(account)
             elif response.kind == AuthorizationResponseKind.Failed or response.kind == AuthorizationResponseKind.TwoFactorAuthenticationRequired:
                 self.loading = False
                 self.error = 'Two-factor authentication failed.'

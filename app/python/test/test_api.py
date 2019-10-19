@@ -4,7 +4,7 @@ import unittest
 import aiohttp
 
 from desktop.lib.api import API, IssueState, create_authorization
-from desktop.lib.http import request, HTTPMethod, deserialize_object, init_session, get_session
+from desktop.lib.http import request, HTTPMethod, deserialize_object, init_http_session, get_http_session
 from desktop.lib.models.account import fetch_user
 
 
@@ -13,15 +13,15 @@ class TestHttp(unittest.TestCase):
         self.loop = asyncio.get_event_loop()
         self.token = 'c415e9d535a95a28ecf955c01487330ebfa646e7'
         self.endpoint = "https://api.github.com"
-        init_session()
+        init_http_session()
 
     def tearDown(self) -> None:
-        self.loop.run_until_complete(get_session().close())
+        self.loop.run_until_complete(get_http_session().close())
         self.loop.close()
 
     async def get_result(self):
         response = await request(
-            get_session(),
+            get_http_session(),
             'http://192.168.2.243',
             None,
             HTTPMethod.GET,

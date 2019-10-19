@@ -291,10 +291,9 @@ def to_github_iso_datestring(time: datetime) -> str:
 
 @with_logger
 class API:
-    def __init__(self, endpoint: str, token: str):
+    def __init__(self, endpoint: str, token: str, http_session: aiohttp.ClientSession):
         self.endpoint = endpoint
         self.token = token
-        self.session = get_session()
 
     async def fetch_repository(self, owner: str, name: str) -> Union[APIRepositoryData, None]:
         try:
@@ -600,7 +599,7 @@ async def create_authorization(endpoint: str, login: str, password: str,
     opt_header = {'X-GitHub-OTP': onetime_password} if onetime_password else {}
     note = get_note()
 
-    response = await request(get_session(),
+    response = await request(get_http_session(),
                              endpoint,
                              None,
                              HTTPMethod.POST,

@@ -1,8 +1,6 @@
-import logging
 import getpass
-import os
-from functools import singledispatch
-from io import BytesIO, TextIOWrapper
+import logging
+from io import BytesIO
 
 from aiofile import AIOFile, Reader
 

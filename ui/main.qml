@@ -1,11 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Window 2.12
 import "./styles/variables.mjs" as Vars
 import './styles/color_system.mjs' as Colors
 
-Item {
+Window {
     width: 640
     height: 480
+    visible: true
 
     Rectangle {
         id: root
@@ -21,9 +23,6 @@ Item {
 
         Component.onCompleted: {
             //console.log(Vars.text_color)
-        }
-        border {
-            style
         }
     }
 }

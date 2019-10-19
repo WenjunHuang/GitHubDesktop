@@ -5,7 +5,7 @@ import aiohttp
 
 from desktop.lib.api import API, IssueState, create_authorization
 from desktop.lib.common import read_text_file_content
-from desktop.lib.http import request, HTTPMethod, deserialize_object, init_session, get_session
+from desktop.lib.http import request, HTTPMethod, deserialize_object, init_http_session, get_http_session
 from desktop.lib.models.account import fetch_user
 
 

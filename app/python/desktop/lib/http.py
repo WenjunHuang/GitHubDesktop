@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import platform
@@ -12,16 +13,7 @@ from dataclasses_json import dataclass_json
 
 from desktop.lib.json import json_generator
 
-http_session: aiohttp.ClientSession
 
-
-def init_session():
-    global http_session
-    http_session = aiohttp.ClientSession(json_serialize=json_generator)
-
-
-def get_session():
-    return http_session
 
 
 class HTTPMethod(Enum):

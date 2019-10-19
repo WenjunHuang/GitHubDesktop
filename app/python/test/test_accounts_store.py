@@ -6,7 +6,7 @@ import aiosqlite
 import sqlite3
 
 from desktop.lib.api import get_dotcom_api_endpoint
-from desktop.lib.http import init_session, get_session
+from desktop.lib.http import init_http_session, get_http_session
 from desktop.lib.stores import AccountsStore, Account
 from desktop.lib.stores.key_value_store import KeyValueStore
 from desktop.lib.stores.token_store import TokenStore
@@ -20,10 +20,10 @@ class TestAccountsStore(unittest.TestCase):
         self.database.row_factory = sqlite3.Row
         self.key_value_store = KeyValueStore(self.database)
         self.secure_store = TokenStore()
-        init_session()
+        init_http_session()
 
     def tearDown(self) -> None:
-        self.loop.run_until_complete(get_session().close())
+        self.loop.run_until_complete(get_http_session().close())
         self.loop.stop()
 
     def test_get_all(self):
