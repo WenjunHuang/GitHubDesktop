@@ -3,7 +3,7 @@ import logging
 import re
 from collections import deque
 from dataclasses import dataclass, field, replace
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import *
 
 from typing_extensions import Literal
@@ -29,14 +29,8 @@ class GitStatusEntry(Enum):
     UpdatedButUnmerged = 'U'
 
 
-class AppFileStatusKind(Enum):
-    New = 'New'
-    Modified = 'Modified'
-    Deleted = 'Deleted'
-    Copied = 'Copied'
-    Renamed = 'Renamed'
-    Conflicted = 'Conflicted'
-    Untracked = 'Untracked'
+class AppFileStatusKind(IntEnum):
+    New, Modified, Deleted, Copied, Renamed, Conflicted, Untracked = range(7)
 
 
 class UnmergedEntrySummary(Enum):

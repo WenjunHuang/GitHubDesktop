@@ -80,6 +80,9 @@ class EventStreamBindingSpec(pinject.BindingSpec):
     def provide_authenticated_subject(self):
         return rx.subject.Subject()
 
+    def provide_working_repository_subject(self):
+        return rx.subject.BehaviorSubject(None)
+
 
 class AppBindingSpec(pinject.BindingSpec):
     '''wrap all binding specs'''
