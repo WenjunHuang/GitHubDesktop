@@ -2,36 +2,22 @@ import asyncio
 import os
 import sys
 
-from PyQt5.QtGui import QGuiApplication
-from PyQt5.QtQml import QQmlApplicationEngine, qmlRegisterType
-from asyncqt import QEventLoop
+from PyQt5.QtQml import QQmlApplicationEngine
 
-from desktop.lib.app_store import init_app_store
-from desktop.lib.http import init_http_session
-from desktop.lib.viewmodels.sign_in import SignInViewModel
-
-app = QGuiApplication(sys.argv)
-engine = QQmlApplicationEngine()
-loop = QEventLoop(app)
-asyncio.set_event_loop(loop)
-asyncio.events._set_running_loop(loop)
-init_http_session()
-
-def register_types():
-    qmlRegisterType(SignInViewModel, "Desktop", 1, 0, SignInViewModel.__name__)
+from desktop.run_app import run_app
 
 
-register_types()
+class TestBootstrap:
+    def __init__(self, qml_engine: QQmlApplicationEngine, event_loop):
+        self.qml_engine = qml_engine
+        self.event_loop = event_loop
 
-config_dir = os.path.abspath(os.path.join(os.getcwd(), "../config"))
-print(config_dir)
-init_app_store(config_dir)
+    def run(self):
+        self.qml_engine.load(os.path.join(os.getcwd(), "app/python/test/ui/test_signin.qml"))
+        with self.event_loop:
+            sys.exit(self.event_loop.run_forever())
 
-print(engine.importPathList())
 
-engine.load("./test_sigin.qml")
-if not engine.rootObjects():
-    sys.exit(-1)
+config_dir = os.path.abspath(os.path.join(os.getcwd(), "app/python/test/config"))
 
-with loop:
-    sys.exit(loop.run_forever())
+run_app(TestBootstrap, config_dir)

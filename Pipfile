@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+asyncqt = "*"
+pyqt5 = "*"
+dataclasses-json = "*"
+aiohttp = "*"
+pypika = "*"
+aiosqlite = "*"
+aiofile = "*"
+pyee = "*"
+keyring = "*"
+pinject = "*"
+rx = "*"
+
+[requires]
+python_version = "3.7"

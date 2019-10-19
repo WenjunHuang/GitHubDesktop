@@ -1,13 +1,16 @@
 import asyncio
 from enum import Enum, IntEnum
+from typing import Callable
 
+import aiohttp
 import pinject
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Q_ENUM, pyqtProperty
-from PyQt5.QtQml import qjsEngine
 from PyQt5.QtQuick import QQuickItem
+from rx.subject import Subject
 
-from desktop.lib.api import get_dotcom_api_endpoint, create_authorization, AuthorizationResponseKind, Optional
+from desktop.lib.api import get_dotcom_api_endpoint, create_authorization, AuthorizationResponseKind, Optional, API
 from desktop.lib.stores import Account, fetch_user, with_logger, AccountsStore
+from desktop.object_graph import get_object_graph
 
 
 class SignInMethod(Enum):
@@ -17,6 +20,17 @@ class SignInMethod(Enum):
 
 class SignInStep(IntEnum):
     EndpointEntry, Authentication, TwoFactorAuthentication, Success = range(4)
+
+
+class SignInViewModelDependencies:
+    '''pinject only support provide by class'''
+
+    def __init__(self, http_session: aiohttp.ClientSession,
+                 authenticated_subject: Subject,
+                 provide_api: Callable[[str, str], API]):
+        self.http_session = http_session
+        self.provide_api = provide_api
+        self.authenticated_subject = authenticated_subject
 
 
 @with_logger
@@ -29,11 +43,11 @@ class SignInViewModel(QQuickItem):
 
     Q_ENUM(SignInStep)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
 
-        obj_graph: pinject.object_graph = qjsEngine(self).contextProperty('object_graph')
-        self._accounts_store = obj_graph.provide(AccountsStore)
+        obj_graph: pinject.object_graph = get_object_graph()
+        self._dependencies = obj_graph.provide(SignInViewModelDependencies)
 
         self.loading = False
         self.error = None
@@ -50,11 +64,11 @@ class SignInViewModel(QQuickItem):
         self.loading = True
 
         async def work():
-            response = await create_authorization(self._endpoint, username, password)
+            response = await create_authorization(self._dependencies.http_session, self._endpoint, username, password)
             if response.kind == AuthorizationResponseKind.Authorized:
                 token = response.token
-                account = await fetch_user(self._endpoint, token)
-                await self._app_store.account_store.add_account(account)
+                account = await fetch_user(self._dependencies.provide_api(self._endpoint, token))
+                await self._dependencies.accounts_store.add_account(account)
 
                 self.kind = SignInStep.Success
                 self.loading = False
@@ -102,16 +116,17 @@ class SignInViewModel(QQuickItem):
 
         async def work():
             try:
-                response = await create_authorization(self._endpoint,
+                response = await create_authorization(self._dependencies.http_session,
+                                                      self._endpoint,
                                                       self._username,
                                                       self._password,
                                                       otp)
-            except Exception as e:
+            except:
                 return
 
             if response.kind == AuthorizationResponseKind.Authorized:
                 token = response.token
-                account = await fetch_user(self._endpoint, token)
+                account = await fetch_user(self._dependencies.provide_api(self._endpoint, token))
                 await self._account_store.add_account(account)
             elif response.kind == AuthorizationResponseKind.Failed or response.kind == AuthorizationResponseKind.TwoFactorAuthenticationRequired:
                 self.loading = False

@@ -5,23 +5,31 @@ from dataclasses import asdict
 from typing import *
 
 from pyee import BaseEventEmitter
+from rx.subject import Subject
 
+from desktop.lib.api import API
 from desktop.lib.auth import get_key_for_account
 from desktop.lib.common import with_logger
 from desktop.lib.json import json_generator
 from desktop.lib.models.account import Account, fetch_user
 from desktop.lib.stores.stores import IKeyValueStore, ISecureStore
-from .base_store import BaseStore
 from aiosqlite import Connection, Cursor
 
 
 @with_logger
-class AccountsStore(BaseStore):
-    def __init__(self, data_store: IKeyValueStore, secure_store: ISecureStore):
+class AccountsStore:
+    def __init__(self, key_value_store: IKeyValueStore,
+                 secure_store: ISecureStore,
+                 error_subject: Subject,
+                 accounts_updated_subject: Subject,
+                 provide_api: Callable[[str, str], API]):
         super().__init__()
-        self.data_store = data_store
+        self.data_store = key_value_store
         self.security_store = secure_store
+        self.provide_api = provide_api
         self.emitter = BaseEventEmitter()
+        self.accounts_updated_subject = accounts_updated_subject
+        self.error_subject = error_subject
         self.loading_task = asyncio.create_task(self.__load_from_store())
         self.accounts = []
 
@@ -32,9 +40,8 @@ class AccountsStore(BaseStore):
     async def add_account(self, account: Account) -> Optional[Account]:
         await self.loading_task
 
-        updated = account
         try:
-            updated = await updated_account(account)
+            updated = await self.updated_account(account)
         except Exception as e:
             self._logger.warning(f"Failed to fetch user {account.login}", e)
             raise
@@ -47,19 +54,20 @@ class AccountsStore(BaseStore):
             )
         except Exception as e:
             self._logger.error(f"Error adding account '{account.login}'", e)
-            self.emit_error(e)
+            self.error_subject.on_next(e)
             return None
 
         self.accounts.append(updated)
+        self.accounts_updated_subject.on_next(list(self.accounts))
         await self.save()
         return updated
 
     async def refresh(self):
         futures = map(lambda acc: self.__try_update_account(acc), self._accounts)
         result, _ = await asyncio.wait(futures)
-        self._accounts = [f.result for f in result]
+        self.accounts = [f.result for f in result]
+        self.accounts_updated_subject.on_next(list(self.accounts))
         await self.save()
-        self.emit_update(self._accounts)
 
     async def remove_account(self, account: Account):
         await self._loading_task
@@ -68,10 +76,10 @@ class AccountsStore(BaseStore):
                                                    account.login)
         except Exception as e:
             self.logger.error(f"Error removing account '{account.login}'", e)
-            self.emit_error(e)
+            self.error_subject.on_next(e)
             return
         else:
-            self._accounts = filter(lambda a: a.id != account.id, self._accounts)
+            self.accounts = filter(lambda a: a.id != account.id, self._accounts)
             await self.save()
 
     async def save(self):
@@ -81,7 +89,7 @@ class AccountsStore(BaseStore):
 
     async def __try_update_account(self, acc: Account):
         try:
-            return await updated_account(acc)
+            return await self.updated_account(acc)
         except Exception as e:
             self.logger.warn(f"Error refreshing account '{acc.login}'", e)
             return acc
@@ -103,10 +111,9 @@ class AccountsStore(BaseStore):
                 logging.error(f"Error getting token for '{key}'. Skipping.", e)
                 self.emit_error(e)
         self.accounts = accounts_with_tokens
-        self.emit_update(self.accounts)
+        self.accounts_updated_subject.on_next(self.accounts)
 
-
-async def updated_account(account: Account) -> Account:
-    if not account.token:
-        raise Exception(f"Cannot update an account which doesn't have a token: {account.login}")
-    return await fetch_user(account.endpoint, account.token)
+    async def updated_account(self, account: Account) -> Account:
+        if not account.token:
+            raise Exception(f"Cannot update an account which doesn't have a token: {account.login}")
+        return await fetch_user(self.provide_api(account.endpoint, account.token))

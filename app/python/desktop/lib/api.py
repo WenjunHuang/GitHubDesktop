@@ -294,6 +294,7 @@ class API:
     def __init__(self, endpoint: str, token: str, http_session: aiohttp.ClientSession):
         self.endpoint = endpoint
         self.token = token
+        self.session = http_session
 
     async def fetch_repository(self, owner: str, name: str) -> Union[APIRepositoryData, None]:
         try:
@@ -592,14 +593,15 @@ class AuthorizationResponse:
 
 
 # create an authorization with given login,password, and one-time password.
-async def create_authorization(endpoint: str, login: str, password: str,
+async def create_authorization(http_session: aiohttp.ClientSession,
+                               endpoint: str, login: str, password: str,
                                onetime_password: Optional[str] = None) -> AuthorizationResponse:
     creds = str(base64.encodebytes(f"{login}:{password}".encode('utf-8')), 'utf-8').strip()
     authorization = f"Basic {creds}"
     opt_header = {'X-GitHub-OTP': onetime_password} if onetime_password else {}
     note = get_note()
 
-    response = await request(get_http_session(),
+    response = await request(http_session,
                              endpoint,
                              None,
                              HTTPMethod.POST,

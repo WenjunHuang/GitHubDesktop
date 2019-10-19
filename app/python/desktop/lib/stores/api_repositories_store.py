@@ -4,7 +4,6 @@ from typing import List, Mapping, Optional, Tuple
 from desktop.lib.api import APIRepositoryData, API
 from desktop.lib.models.account import Account
 from desktop.lib.stores.accounts_store import AccountsStore
-from desktop.lib.stores.base_store import BaseStore
 
 
 @dataclass
@@ -12,7 +11,7 @@ class AccountRepositories:
     repositories: List[APIRepositoryData]
 
 
-class ApiRepositoriesStore(BaseStore):
+class ApiRepositoriesStore:
     _account_state: Mapping[Account, AccountRepositories]
 
     def __init__(self, accounts_store: AccountsStore):

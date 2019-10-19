@@ -6,6 +6,7 @@ import sys
 import aiohttp
 import aiosqlite
 import pinject
+import rx
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtQml import QQmlApplicationEngine
 from aiosqlite import Connection
@@ -32,10 +33,6 @@ class BasicBindingSpec(pinject.BindingSpec):
         asyncio.events._set_running_loop(loop)
         return loop
 
-    def provide_config_dir(self):
-        # todo replace real config dir
-        return os.getcwd()
-
 
 class DatabaseBindingSpec(pinject.BindingSpec):
     def provide_database(self, config_dir):
@@ -55,8 +52,12 @@ class HttpApiBindingSpec(pinject.BindingSpec):
     def provide_api(self, endpoint, token, http_session):
         return API(endpoint, token, http_session)
 
-    def provide_http_session(self, event_loop):
-        return event_loop.run_until_complete(aiohttp.ClientSession(json_serialize=json_generator))
+    def provide_http_session(self):
+        # return event_loop.run_until_complete(aiohttp.ClientSession(json_serialize=json_generator))
+        return aiohttp.ClientSession(json_serialize=json_generator)
+
+    def dependencies(self):
+        return [BasicBindingSpec()]
 
 
 class StoreBindingSpec(pinject.BindingSpec):
@@ -69,12 +70,20 @@ class StoreBindingSpec(pinject.BindingSpec):
         return secure_store
 
 
-# class EventStreamBindingSpec(pinject.BindingSpec):
-#     pass
+class EventStreamBindingSpec(pinject.BindingSpec):
+    def provide_error_subject(self):
+        return rx.subject.Subject()
+
+    def provide_accounts_updated_subject(self):
+        return rx.subject.Subject()
+
+    def provide_authenticated_subject(self):
+        return rx.subject.Subject()
 
 
 class AppBindingSpec(pinject.BindingSpec):
     '''wrap all binding specs'''
 
     def dependencies(self):
-        return [StoreBindingSpec(), HttpApiBindingSpec(), DatabaseBindingSpec(), BasicBindingSpec()]
+        return [StoreBindingSpec(), HttpApiBindingSpec(), DatabaseBindingSpec(), BasicBindingSpec(),
+                EventStreamBindingSpec()]

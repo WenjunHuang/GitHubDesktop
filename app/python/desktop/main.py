@@ -1,11 +1,6 @@
-import pinject
-
 from desktop.bootstrap import Bootstrap
-from desktop.lib.binding_specs import AppBindingSpec
-from desktop.register_qml_types import register_qml_types
+from desktop.run_app import run_app
+import os
 
-
-obj_graph = pinject.new_object_graph(binding_specs=[AppBindingSpec()])
-register_qml_types()
-bootstrap = obj_graph.provide(Bootstrap)
-bootstrap.run()
+if __name__ == '__main__':
+    run_app(Bootstrap, os.path.join(os.getcwd(), "config"))
