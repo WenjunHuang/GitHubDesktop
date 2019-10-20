@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # A github repository
 from typing import Optional
@@ -13,9 +13,9 @@ class GitHubRepository:
     owner: Owner
     private: Optional[bool]
     html_url: Optional[str]
-    default_branch: Optional[str]
     clone_url: Optional[str]
     parent: Optional['GitHubRepository']
+    default_branch: Optional[str] = 'master'
 
     def endpoint(self):
         return self.owner.endpoint

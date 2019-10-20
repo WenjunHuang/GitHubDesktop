@@ -7,9 +7,9 @@ from desktop.lib.models.diff import DiffSelectionType
 
 @dataclass
 class WorkingDirectoryStatus:
-    files: Optional[Iterable[WorkingDirectoryFileChange]]
+    files: Iterable[WorkingDirectoryFileChange] = field(default_factory=list)
     file_index_by_id: Mapping[str, int] = field(init=False, default_factory=dict)
-    include_all: Optional[bool] = None
+    include_all: Optional[bool] = True
 
     def __post_init__(self):
         if not self.include_all:
@@ -21,12 +21,16 @@ class WorkingDirectoryStatus:
             self.file_index_by_id = m
 
     def with_include_all_files(self, include_all: bool) -> 'WorkingDirectoryStatus':
-        return WorkingDirectoryStatus(files=self.file_index_by_id,
+        return WorkingDirectoryStatus(files=map(lambda f: f.with_include_all(include_all), self.files),
                                       include_all=True)
 
     def find_file_with_id(self, id: str) -> Optional[WorkingDirectoryFileChange]:
         ix = self.file_index_by_id.get(id)
         return None if not ix else self.files[ix]
+
+    def find_file_index_by_id(self, id: str) -> int:
+        ix = self.file_index_by_id.get(id)
+        return ix if ix else -1
 
 
 def get_include_all_state(files: Iterable[WorkingDirectoryFileChange]) -> Optional[bool]:

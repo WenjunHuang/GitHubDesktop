@@ -334,11 +334,22 @@ class FileChange:
 class WorkingDirectoryFileChange(FileChange):
     selection: DiffSelection
 
+    def with_include_all(self, include: bool) -> 'WorkingDirectoryFileChange':
+        if include:
+            new_selection = self.selection.with_select_all()
+        else:
+            new_selection = self.selection.with_select_none()
+        return self.with_selection(new_selection)
+
+    def with_selection(self, selection: DiffSelection) -> 'WorkingDirectoryFileChange':
+        return WorkingDirectoryFileChange(path=self.path,
+                                          status=self.status,
+                                          selection=selection)
+
 
 @dataclass(frozen=True)
 class CommittedFileChange(FileChange):
     commitish: str
-
 
 
 def build_status_map(files: MutableMapping[str, WorkingDirectoryFileChange]):

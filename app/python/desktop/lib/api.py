@@ -158,13 +158,17 @@ class APIOrganizationData:
     avatar_url: str
 
 
-class PullRequestState(Enum):
-    Open = 'open'
-    Closed = 'closed'
+class PullRequestState(IntEnum):
+    Open = 0
+    Closed = 1
 
     @classmethod
     def from_str(cls, value: str) -> 'PullRequestState':
         return PullRequestState(value)
+
+    @classmethod
+    def to_str(cls, value: 'PullRequestState') -> str:
+        return value.name.lower()
 
 
 @dataclass_json
@@ -186,20 +190,31 @@ class APIPullRequestData:
     head: APIPullRequestRefData
     state: PullRequestState = field(
         metadata=config(
-            encoder=PullRequestState,
+            encoder=PullRequestState.to_str,
             decoder=PullRequestState.from_str
         )
     )
 
 
-class APIRefState(Enum):
-    Failure = 'failure'
-    Pending = 'pending'
-    Success = 'success'
+class APIRefState(IntEnum):
+    Failure = 0
+    Pending = 1
+    Success = 2
 
     @classmethod
-    def from_str(cls, value: str) -> 'APIRefState':
-        return APIRefState(value)
+    def from_str(cls, value: str) -> Optional['APIRefState']:
+        if APIRefState.Failure.name.lower() == value.lower():
+            return APIRefState.Failure
+        elif APIRefState.Pending.name.lower() == value.lower():
+            return APIRefState.Pending
+        elif APIRefState.Success.name.lower() == value.lower():
+            return APIRefState.Success
+        else:
+            return None
+
+    @classmethod
+    def to_str(cls, value: 'APIRefState') -> str:
+        return value.name.lower()
 
 
 @dataclass_json
@@ -207,7 +222,7 @@ class APIRefState(Enum):
 class APIRefStatusItemData:
     state: APIRefState = field(
         metadata=config(
-            encoder=APIRefState,
+            encoder=APIRefState.to_str,
             decoder=APIRefState.from_str
         )
     )

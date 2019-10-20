@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from typing import Optional
 import pathlib
 
@@ -11,13 +11,14 @@ class Repository:
     id: int
     github_repository: Optional[GitHubRepository]
     missing: bool
+    name: str = field(init=False)
     path: str
 
-    def name(self):
+    def __post_init__(self):
         if self.github_repository and self.github_repository.name:
-            return self.github_repository.name
+            self.name = self.github_repository.name
         else:
-            return get_base_name(self.path)
+            self.name = get_base_name(self.path)
 
 
 def get_base_name(path: str) -> str:
