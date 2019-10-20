@@ -16,4 +16,12 @@ class RepositoryStateCache:
         if existing:
             github_users = self._github_user_store.get_users_for_repository(repository)
             return replace(existing, github_users={**existing.github_users, **github_users})
-        new_item = get_initial_repository_state()
+        new_item = RepositoryState.create_initial_repository_state()
+        self._repository_state[repository] = new_item
+        return new_item
+
+    def update(self, repository: Repository, **kwargs):
+        current_state = self.get(repository)
+        for key, value in kwargs:
+            setattr(current_state, key, value)
+        self._repository_state[repository] = current_state

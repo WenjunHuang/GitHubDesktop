@@ -8,7 +8,8 @@ kSmsMessageWelcomeText = "We just sent you a message via SMS with your authentic
 
 @unique
 class AuthenticationMode(IntEnum):
-    Sms, App = range(2)
+    Sms = 0
+    App = 1
 
 
 def get_welcome_message(type: AuthenticationMode) -> str:

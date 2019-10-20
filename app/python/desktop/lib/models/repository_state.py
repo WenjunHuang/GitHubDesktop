@@ -100,4 +100,13 @@ class RepositoryState:
             github_users={},
             commit_lookup={},
             local_commit_shas=[],
+            ahead_behind=None,
+            remote=None,
+            is_push_pull_fetch_in_progress=False,
+            is_committing=False,
+            last_fetched=None,
+            checkout_progress=None,
+            push_pull_fetch_progress=None,
+            revert_progress=None
+
         )

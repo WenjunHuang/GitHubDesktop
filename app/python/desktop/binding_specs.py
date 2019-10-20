@@ -80,7 +80,7 @@ class EventStreamBindingSpec(pinject.BindingSpec):
     def provide_authenticated_subject(self):
         return rx.subject.Subject()
 
-    def provide_working_repository_subject(self):
+    def provide_selected_state(self):
         return rx.subject.BehaviorSubject(None)
 
 

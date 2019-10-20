@@ -9,17 +9,9 @@ from PyQt5.QtQuick import QQuickItem
 from rx.subject import Subject
 
 from desktop.lib.api import get_dotcom_api_endpoint, create_authorization, AuthorizationResponseKind, Optional, API
+from desktop.lib.models.signin_state import SignInStep, SignInMethod
 from desktop.lib.stores import Account, fetch_user, with_logger, AccountsStore
 from desktop.object_graph import get_object_graph
-
-
-class SignInMethod(Enum):
-    Basic = 'basic'
-    Web = 'web'
-
-
-class SignInStep(IntEnum):
-    EndpointEntry, Authentication, TwoFactorAuthentication, Success = range(4)
 
 
 class SignInViewModelDependencies:
