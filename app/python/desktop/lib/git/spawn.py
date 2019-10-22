@@ -1,11 +1,16 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Iterable
 import asyncio
 import os
 
+from desktop.lib.git.errors import GitError, GitErrorRegexes
 
-async def spawn_and_complete(args: List[str],
-                             path: str,
-                             stdin: Optional[str] = None) -> Tuple[bytes, bytes, int]:
+
+class GitError(Exception):
+    def __init__(self,result:GitResult,args:Iterable[str]):
+
+async def git(args: List[str],
+              path: str,
+              stdin: Optional[str] = None) -> Tuple[bytes, bytes, int]:
     args = ['git', f"--git-dir {os.path.join(path, '.git')}"] + args
     proc = await asyncio.create_subprocess_shell(' '.join(args),
                                                  stdin=asyncio.subprocess.PIPE,
@@ -19,3 +24,10 @@ async def spawn_and_complete(args: List[str],
     returncode = proc.returncode
 
     return stdout, stderr, returncode
+
+
+def parse_error(stderr: str) -> Optional[GitError]:
+    for regex, error in GitErrorRegexes:
+        if regex.match(stderr):
+            return error
+    return None

@@ -80,13 +80,12 @@ class ChangesViewModel(QQuickItem):
         super().__init__(parent)
         obj_graph: pinject.object_graph = get_object_graph()
         self._dependencies = obj_graph.provide(ChangesViewModelDependencies)
+        self._change_file_list_model = ChangeFileList(self)
 
         self._disposable = self._dependencies.selected_state_subject.subscribe(
             on_next=self.on_working_repository_changed)
 
         self.destroyed.connect(self.on_destroyed)
-
-        self._change_file_list_model = ChangeFileList(self)
 
     def on_selected_state_changed(self, selected_state: Optional[PossibleSelections]):
         if not selected_state or type(selected_state) != RepositorySelection:
@@ -116,10 +115,6 @@ class ChangesViewModel(QQuickItem):
         return self._change_file_list_model
 
     @pyqtProperty(bool)
-    def includeAll(self):
-        return self._include_all
-
-    @pyqtProperty(bool)
     def disableAllCheckChange(self):
         return self._disable_all_check_change
 
@@ -132,13 +127,13 @@ class ChangesViewModel(QQuickItem):
     def includeAllValue(self):
         return self._include_all_value
 
-    @includeAll.setter
+    @includeAllValue.setter
     def includeAllValue(self, value: CheckboxValue):
         self._include_all_value = value
         self.includeAllChanged.emit()
 
-    @pyqtSlot(int)
-    def onRowClick(self,number:int):
+    @pyqtSlot(int, name="onRowClick")
+    def on_row_click(self, number: int):
         pass
 
 

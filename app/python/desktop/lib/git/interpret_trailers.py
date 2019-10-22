@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional, List
 
 from desktop.lib.git.config import get_config_value
-from desktop.lib.git.spawn import spawn_and_complete
+from desktop.lib.git.spawn import git
 from desktop.lib.models.repository import Repository
 
 
@@ -46,7 +46,7 @@ async def get_trailer_separator_characters(repository: Repository):
 async def parse_trailers(repository: Repository,
                          commit_message: str) -> List[Trailer]:
     opts = ['interpret-trailers', '--parse']
-    stdout, stderr, returncode = await spawn_and_complete(opts, repository.path, commit_message)
+    stdout, stderr, returncode = await git(opts, repository.path, commit_message)
 
     trailers = stdout.decode('utf-8')
     if not trailers:

@@ -16,3 +16,10 @@ class AppState:
     local_repository_state_lookup: Mapping[int, LocalRepositoryState]
     selected_state: Optional[PossibleSelections]
     signin_state: Optional[SignInState]
+
+    async def add_repositories(self,paths:Iterable[str])->Iterable[Repository]:
+        added_repositories = []
+        lfs_repositories = []
+
+        for path in paths:
+            validated_path = await validated_repository_path(path)

@@ -12,7 +12,7 @@ from desktop.lib.git.diff import get_binary_paths
 from desktop.lib.git.diff_check import get_files_with_conflict_markers
 from desktop.lib.git.merge import is_mergeheadset
 from desktop.lib.git.rebase import get_rebase_internal_state, RebaseInternalState
-from desktop.lib.git.spawn import spawn_and_complete
+from desktop.lib.git.spawn import git
 from desktop.lib.models.diff import DiffSelection
 from desktop.lib.models.repository import Repository
 
@@ -144,7 +144,7 @@ async def get_status(repository: Repository):
         '--porcelain=2',
         '-z',
     ]
-    stdout, stderr, returncode = await spawn_and_complete(args, repository.path)
+    stdout, stderr, returncode = await git(args, repository.path)
 
     if stdout:
         parsed = parse_porcelain_status(stdout.decode())

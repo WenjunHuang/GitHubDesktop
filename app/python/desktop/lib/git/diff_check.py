@@ -1,5 +1,5 @@
 from typing import Mapping
-from desktop.lib.git.spawn import spawn_and_complete
+from desktop.lib.git.spawn import git
 import re
 
 kFileNameCaptureRe = re.compile(r"(.+):\d+: leftover conflict marker")
@@ -7,7 +7,7 @@ kFileNameCaptureRe = re.compile(r"(.+):\d+: leftover conflict marker")
 
 async def get_files_with_conflict_markers(repository_path: str) -> Mapping[str, int]:
     args = ['diff', '--check']
-    stdout, _ = await spawn_and_complete(args, repository_path)
+    stdout, _ = await git(args, repository_path)
 
     # result parsing
     output_str = stdout.decode('utf-8')
