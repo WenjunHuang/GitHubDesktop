@@ -5,8 +5,9 @@ import os
 from desktop.lib.git.errors import GitError, GitErrorRegexes
 
 
-class GitError(Exception):
-    def __init__(self, result: GitResult, args: Iterable[str]):
+# class GitError(Exception):
+#     def __init__(self, result: GitResult, args: Iterable[str]):
+#         pass
 
 
 async def git(args: List[str],
