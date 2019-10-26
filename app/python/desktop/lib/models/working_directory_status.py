@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 from typing import Mapping, Optional, Iterable
 
 from desktop.lib.git.status import WorkingDirectoryFileChange

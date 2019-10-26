@@ -1,6 +1,7 @@
-from typing import *
 from dataclasses import dataclass
-from pypika import Query, Table, Field
+from dataclasses import dataclass
+
+from pypika import Table
 
 
 @dataclass(frozen=True)

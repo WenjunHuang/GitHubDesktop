@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import platform
@@ -7,13 +6,8 @@ from enum import Enum
 from typing import *
 from urllib.parse import urljoin, quote
 
-import aiohttp
 import aiohttp as http
 from dataclasses_json import dataclass_json
-
-from desktop.lib.json import json_generator
-
-
 
 
 class HTTPMethod(Enum):

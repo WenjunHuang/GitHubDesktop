@@ -1,5 +1,4 @@
 import asyncio
-from enum import Enum, IntEnum
 from typing import Callable
 
 import aiohttp
@@ -10,7 +9,7 @@ from rx.subject import Subject
 
 from desktop.lib.api import get_dotcom_api_endpoint, create_authorization, AuthorizationResponseKind, Optional, API
 from desktop.lib.models.signin_state import SignInStep, SignInMethod
-from desktop.lib.stores import Account, fetch_user, with_logger, AccountsStore
+from desktop.lib.stores import Account, fetch_user, with_logger
 from desktop.object_graph import get_object_graph
 
 

@@ -1,8 +1,7 @@
-import itertools
 import logging
 import re
 from collections import deque
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from typing import *
 

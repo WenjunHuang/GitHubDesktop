@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from enum import Enum, IntEnum, auto
+from enum import IntEnum, auto
 from typing import Tuple, Optional
 
 from typing_extensions import Literal
@@ -121,5 +121,5 @@ class SignInPopup:
 
 @dataclass(frozen=True)
 class AboutPopup:
-
+    pass
 
