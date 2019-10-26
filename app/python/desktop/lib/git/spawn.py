@@ -5,19 +5,16 @@ import os
 from desktop.lib.git.errors import GitError, GitErrorRegexes
 
 
-class GitError(Exception):
-    def __init__(self, result: GitResult, args: Iterable[str]):
-
-
 async def git(args: List[str],
               path: str,
               stdin: Optional[str] = None) -> Tuple[bytes, bytes, int]:
-    args = [f"--git-dir {os.path.join(path, '.git')}"] + args
+    # args = [f"--git-dir {path}"] + args
     try:
-        proc = await asyncio.create_subprocess_exec('git', ' '.join(args),
+        proc = await asyncio.create_subprocess_exec('git', *args,
                                                     stdin=asyncio.subprocess.PIPE,
                                                     stdout=asyncio.subprocess.PIPE,
-                                                    stderr=asyncio.subprocess.PIPE)
+                                                    stderr=asyncio.subprocess.PIPE,
+                                                    cwd=path)
         if stdin:
             proc.stdin.write(stdin.encode('utf-8'))
             await proc.stdin.drain()
@@ -26,11 +23,8 @@ async def git(args: List[str],
         returncode = proc.returncode
 
         return stdout, stderr, returncode
-    except FileNotFoundError as fnf:
-        raise
-
-
-# git command not found
+    except FileNotFoundError as e:
+        return None, None, GitError.GitNotFoundErrorCode
 
 
 def parse_error(stderr: str) -> Optional[GitError]:
