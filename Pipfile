@@ -17,6 +17,7 @@ pyee = "*"
 keyring = "*"
 pinject = "*"
 rx = "*"
+send2trash = "*"
 
 [requires]
 python_version = "3.7"

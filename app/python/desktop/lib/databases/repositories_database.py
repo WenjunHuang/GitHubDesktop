@@ -5,7 +5,8 @@ from aiosqlite import Connection
 from pypika import SQLLiteQuery as Query, Table, Field
 from datetime import datetime
 
-from desktop.lib.api import APIRepositoryData
+from desktop.lib.api import APIRepositoryData, APIBranchData
+from desktop.lib.convert import local_now_with_timezone, timestamp_seconds, from_timestamp_to_local
 from desktop.lib.models.github_repository import GitHubRepository
 from desktop.lib.models.owner import Owner
 from desktop.lib.models.repository import Repository
@@ -229,12 +230,82 @@ class RepositoriesDatabase:
 
     async def remove_repository(self, repo_id: int):
         q = Query().from_(RepositoryTable).delete().where(RepositoryTable.id == repo_id)
-        cursor = await self._database.execute(q.get_sql())
+        await self._database.execute(q.get_sql())
 
     async def update_repository_missing(self, repository: Repository, missing: bool) -> Repository:
-        repo_id = repository.id
+        assert repository.id
         update = Query().update(RepositoryTable).set(RepositoryTable.missing, missing).where(
             RepositoryTable.id == repository.id)
-        cursor = await self._database.execute(update.get_sql())
+        await self._database.execute(update.get_sql())
 
         return replace(repository, missing=missing)
+
+    async def update_repository_path(self, repository: Repository, path: str) -> Repository:
+        assert repository.id
+        update = Query() \
+            .update(RepositoryTable) \
+            .set(RepositoryTable.missing, False) \
+            .set(RepositoryTable.path, path) \
+            .where(RepositoryTable.id == repository.id)
+        await self._database.execute(update.get_sql())
+        return replace(repository, missing=False, path=path)
+
+    async def update_last_stash_checkdate(self, repository: Repository, dt: datetime = local_now_with_timezone()):
+        assert repository.id
+
+        update = Query().update(RepositoryTable) \
+            .set(RepositoryTable.last_stash_check_date, timestamp_seconds(dt)) \
+            .where(RepositoryTable.id == repository.id)
+        await self._database.execute(update.get_sql())
+
+    async def get_last_stash_checkdate(self, repository: Repository) -> Optional[datetime]:
+        assert repository.id
+
+        q = Query().from_(RepositoryTable) \
+            .select(RepositoryTable.last_stash_check_date) \
+            .where(RepositoryTable.id == repository.id)
+        cursor = await self._database.execute(q.get_sql())
+        data = await cursor.fetchone()
+        if data:
+            return from_timestamp_to_local(data['last_stash_check_date'])
+        else:
+            return None
+
+    async def update_github_repository(self, repository: Repository, endpoint: str,
+                                       github_repository: APIRepositoryData):
+        assert repository.id
+
+        updated_github_repo = await self.put_github_repository(endpoint, github_repository)
+
+        update = Query().update(RepositoryTable) \
+            .set(RepositoryTable.github_repository_id, updated_github_repo.db_id) \
+            .where(RepositoryTable.id == repository.id)
+        await self._database.execute(update.get_sql())
+
+        return replace(repository, github_repository=updated_github_repo)
+
+    async def update_branch_protections(self,
+                                        github_repository: GitHubRepository,
+                                        protected_branches: Iterable[APIBranchData]):
+        assert github_repository.db_id
+
+        delete = Query().from_(ProtectedBranchTable) \
+            .delete() \
+            .where(ProtectedBranchTable.repo_id == github_repository.db_id)
+
+        if protected_branches:
+            insert = Query().into(ProtectedBranchTable) \
+                .columns(ProtectedBranchTable.repo_id, ProtectedBranchTable.name) \
+                .values(*[(github_repository.db_id, b.name) for b in protected_branches])
+            await self._database.execute(insert.get_sql())
+
+    async def update_last_prune_date(self, repository: Repository, dt: datetime):
+        assert repository.id
+        assert repository.github_repository
+        assert repository.github_repository.db_id
+
+        update = Query().update(GitHubRepositoryTable) \
+            .set(GitHubRepositoryTable.last_prune_date, timestamp_seconds(dt)) \
+            .where(GitHubRepositoryTable.db_id == repository.github_repository.db_id)
+        await self._database.execute(update.get_sql())
+

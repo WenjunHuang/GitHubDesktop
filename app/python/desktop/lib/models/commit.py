@@ -31,8 +31,8 @@ class Commit:
     body: str
     author: CommitIdentity
     committer: CommitIdentity
-    parent_shas: Tuple[str, ...]
-    trailers: Tuple[Trailer, ...]
+    parent_shas: List[str]
+    trailers: List[Trailer]
 
     def __post_init__(self):
         object.__setattr__(self, 'coauthors', extract_coauthors(self.trailers))
