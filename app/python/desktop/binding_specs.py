@@ -21,7 +21,9 @@ from desktop.lib.stores.token_store import TokenStore
 
 class BasicBindingSpec(pinject.BindingSpec):
     def provide_app(self):
-        return QGuiApplication(sys.argv)
+        sys_args = sys.argv
+        sys_args += ['--style', './ui/common']
+        return QGuiApplication(sys_args)
 
     def provide_qml_engine(self, app):
         # must dependent on app

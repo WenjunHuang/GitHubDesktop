@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
-from typing import Union, Literal, Optional, Iterable
+from typing import Union, Optional, Iterable
+
+from typing_extensions import Literal
 
 from desktop.lib.models.branch import Branch, AheadBehind
 from desktop.lib.models.merge import MergeResult

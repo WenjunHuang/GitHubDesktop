@@ -2,7 +2,7 @@ from typing import List, Tuple, Optional, Iterable
 import asyncio
 import os
 
-from desktop.lib.git.errors import GitError, GitErrorRegexes
+from desktop.lib.git.errors import GitErrorRegexes, GitCmdStatusCode
 
 
 async def git(args: List[str],
@@ -24,10 +24,10 @@ async def git(args: List[str],
 
         return stdout, stderr, returncode
     except FileNotFoundError as e:
-        return None, None, GitError.GitNotFoundErrorCode
+        return None, None, GitCmdStatusCode.GitNotFoundErrorCode
 
 
-def parse_error(stderr: str) -> Optional[GitError]:
+def parse_error(stderr: str) -> Optional[GitCmdStatusCode]:
     for regex, error in GitErrorRegexes:
         if regex.match(stderr):
             return error

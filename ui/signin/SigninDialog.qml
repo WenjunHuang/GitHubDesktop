@@ -1,7 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import Desktop 1.0
+import GitHubDesktop 1.0
 import "../common" as C
 import "../dialog"
 import "../octicons"
