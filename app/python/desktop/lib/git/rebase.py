@@ -1,11 +1,9 @@
+import os
 from dataclasses import dataclass
-from io import BytesIO
 from typing import Optional
 
 from desktop.lib.common import read_text_file_content
 from desktop.lib.models.repository import Repository
-from aiofile import AIOFile, Reader
-import os
 
 
 @dataclass

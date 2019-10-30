@@ -13,11 +13,11 @@ async def get_top_level_working_directory(path: str) -> Optional[str]:
     if returncode == 128:
         return None
 
-    if returncode != 0 or returncode != 128:
+    if returncode != 0:
         return None
 
     relative_path = stdout.decode('utf-8').strip()
     if not relative_path:
         return path
 
-    return os.path.normcase(os.path.join(path, relative_path))
+    return os.path.normpath(os.path.join(path, relative_path))
