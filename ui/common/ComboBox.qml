@@ -1,9 +1,9 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick.Templates 2.12 as T
 import "../styles/variables.mjs" as Vars
 import "../styles/color_system.mjs" as Colors
 
-ComboBox {
+T.ComboBox {
     id: control
 
     delegate: ItemDelegate {

@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
-from typing import Union, TypeAlias, Iterable, Optional
+from typing import Union, Iterable, Optional
 
 from typing_extensions import Literal
 
-from desktop.lib.models.diff import DiffHunk, Image
+from .image import Image
+from .raw_diff import DiffHunk
 
 
 class DiffType(IntEnum):

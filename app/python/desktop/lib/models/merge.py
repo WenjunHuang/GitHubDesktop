@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from typing import Optional, Literal, Iterable, Union
+from typing import Optional, Iterable, Union
+
+from typing_extensions import Literal
 
 from desktop.lib.models.computed_action import ComputedAction
 

@@ -8,7 +8,6 @@ qqmlApplicationEngine: Optional[QQmlApplicationEngine] = None
 def init_qml_engine():
     global qqmlApplicationEngine
     qqmlApplicationEngine = QQmlApplicationEngine()
-    print(qqmlApplicationEngine)
 
 
 def get_qml_engine():

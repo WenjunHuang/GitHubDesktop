@@ -2,7 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import "../dialog"
-import "../common" as C
+import "../common"
 import "../styles/variables.mjs" as Vars
 
 GithubDialog {
@@ -11,19 +11,19 @@ GithubDialog {
     showFooter: false
 
     contentComponent: Component {
-        C.Pane {
+        Pane {
             ColumnLayout {
                 width: parent.width
-                C.TabBar {
+                TabBar {
                     id: _tabBar
                     Layout.fillWidth: true
-                    C.TabButton {
+                    TabButton {
                         text: 'GitHub.com'
                     }
-                    C.TabButton {
+                    TabButton {
                         text: 'GitHub Enterprise Server'
                     }
-                    C.TabButton {
+                    TabButton {
                         text: 'URL'
                     }
                 }
@@ -82,7 +82,7 @@ GithubDialog {
                                 text: 'If you have a GitHub Enterprise Server account at work,sign in to it to get access to your repositories.'
                                 wrapMode: Text.WordWrap
                             }
-                            C.PrimaryButton {
+                            PrimaryButton {
                                 Layout.alignment: Qt.AlignBottom | Qt.AlignRight
                                 implicitWidth: 120
                                 text: 'Sign In'
@@ -90,7 +90,7 @@ GithubDialog {
                         }
                     }
 
-                    C.Pane {
+                    Pane {
                         id: _generic
                         property bool active: stack.currentIndex === 2
 

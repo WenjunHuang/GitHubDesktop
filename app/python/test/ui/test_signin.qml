@@ -10,5 +10,4 @@ Window {
     S.SigninDialog {
         anchors.fill: parent
     }
-
 }
