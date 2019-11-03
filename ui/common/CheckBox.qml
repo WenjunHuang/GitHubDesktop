@@ -1,11 +1,11 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick.Templates 2.12 as T
 import QtGraphicalEffects 1.13
 import "../styles/variables.mjs" as Vars
 import "../styles/color_system.mjs" as Colors
 import "../octicons"
 
-CheckBox {
+T.CheckBox {
     id: control
     padding: 0
 

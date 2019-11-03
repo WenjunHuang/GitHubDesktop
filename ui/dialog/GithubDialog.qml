@@ -2,11 +2,11 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtGraphicalEffects 1.13
-import "../common" as C
+import "../common"
 import "../octicons"
 import "../styles/variables.mjs" as Vars
 
-C.Pane {
+Pane {
     id: _dialog
     property string title
 
@@ -35,7 +35,7 @@ C.Pane {
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
-        C.Pane {
+        Pane {
             Layout.fillWidth: true
             //contentHeight: _title.implicitHeight
             //contentHeight: 50
@@ -129,7 +129,7 @@ C.Pane {
             z: 1
         }
 
-        C.Pane {
+        Pane {
             id: _error
             Layout.fillWidth: true
             padding: Vars.spacing
@@ -174,7 +174,7 @@ C.Pane {
             Layout.fillWidth: true
         }
 
-        C.Pane {
+        Pane {
             id: _content
             Layout.fillWidth: true
 
@@ -194,14 +194,14 @@ C.Pane {
             visible: showFooter
         }
 
-        C.Pane {
+        Pane {
             id: _footer
             padding: Vars.spacingX2
             contentHeight: _cancelButton.implicitHeight
             Layout.fillWidth: true
             visible:showFooter
 
-            C.SecondaryButton {
+            SecondaryButton {
                 id: _cancelButton
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
@@ -209,7 +209,7 @@ C.Pane {
                 text: dismissButtonText
                 onClicked: dismissed()
             }
-            C.PrimaryButton {
+            PrimaryButton {
                 id: _submitButton
                 text: submitButtonText
                 implicitWidth: 120

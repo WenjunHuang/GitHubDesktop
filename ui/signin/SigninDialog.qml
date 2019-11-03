@@ -2,7 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import GitHubDesktop 1.0
-import "../common" as C
+import "../common"
 import "../dialog"
 import "../octicons"
 import "../styles/variables.mjs" as Vars
@@ -22,7 +22,7 @@ GithubDialog {
     }
 
     contentComponent: Component {
-        C.Pane {
+        Pane {
             id: signInContent
             property alias userAccount: _userAccount.text
             property alias userPassword: _userPassword.text
@@ -40,7 +40,7 @@ GithubDialog {
                         text: 'User name or email addres'
                         font.pixelSize: Vars.font_size
                     }
-                    C.TextInput {
+                    TextField {
                         id: _userAccount
                         Layout.fillWidth: true
                         enabled: !viewModel.loading
@@ -54,7 +54,7 @@ GithubDialog {
                         text: 'password'
                         font.pixelSize: Vars.font_size
                     }
-                    C.TextInput {
+                    TextField {
                         id: _userPassword
                         Layout.fillWidth: true
                         echoMode: TextInput.Password
@@ -94,7 +94,7 @@ GithubDialog {
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
-                        C.Pane {
+                        Pane {
                             anchors.centerIn: parent
                             anchors.verticalCenterOffset: -3
                             Text {
@@ -104,7 +104,7 @@ GithubDialog {
                             }
                         }
                     }
-                    C.Pane {
+                    Pane {
                         Layout.fillWidth: true
                         contentHeight: _externalText.implicitHeight
                         RowLayout {

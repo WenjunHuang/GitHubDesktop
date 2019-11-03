@@ -3,11 +3,11 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import Desktop 1.0
 import "../dialog"
-import "../common" as C
+import "../common"
 import "../octicons"
 import "../styles/variables.mjs" as Vars
 
-C.Pane {
+Pane {
     property string endpoint
     property string token
 

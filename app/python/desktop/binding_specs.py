@@ -15,6 +15,7 @@ from asyncqt import QEventLoop
 from desktop.lib.api import API
 from desktop.lib.databases.github_user_database import GitHubUserDatabase
 from desktop.lib.json import json_generator
+from desktop.lib.static import init_qml_engine, get_qml_engine
 from desktop.lib.stores.key_value_store import KeyValueStore
 from desktop.lib.stores.token_store import TokenStore
 
@@ -27,7 +28,8 @@ class BasicBindingSpec(pinject.BindingSpec):
 
     def provide_qml_engine(self, app):
         # must dependent on app
-        return QQmlApplicationEngine()
+        init_qml_engine()
+        return get_qml_engine()
 
     def provide_event_loop(self, app):
         loop = QEventLoop(app)
