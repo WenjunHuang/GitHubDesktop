@@ -32,7 +32,7 @@ def parse_raw_unfolded_trailers(trailers: str,
 def parse_single_unfolded_trailer(line: str,
                                   separators: str) -> Optional[Trailer]:
     for separator in separators:
-        idx = line.index(separator)
+        idx = line.find(separator)
         if idx > 0:
             return Trailer(token=line[0:idx].strip(),
                            value=line[idx].strip())

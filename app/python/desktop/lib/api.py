@@ -2,6 +2,7 @@ import base64
 import os
 import re
 import socket
+import aiohttp
 from abc import ABC
 from dataclasses import field
 from datetime import datetime
